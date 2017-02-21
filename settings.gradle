@@ -1,1 +1,1 @@
-include ':androidapp'
+include ':androidapp', ':webrtc_sdk'

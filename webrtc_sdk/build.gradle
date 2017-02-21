@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        def src = ['./src/main/api','./src/main/base','./src/main/audio_device']
+        java.srcDirs = src
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+// 如果需要编译出jar包，则执行 build:jar
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
