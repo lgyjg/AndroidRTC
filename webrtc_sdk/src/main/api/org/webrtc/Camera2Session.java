@@ -282,7 +282,7 @@ public class Camera2Session implements CameraSession {
       Context applicationContext, CameraManager cameraManager,
       SurfaceTextureHelper surfaceTextureHelper, String cameraId, int width, int height,
       int framerate) {
-    new Camera2Session(callback, events, applicationContext, cameraManager, surfaceTextureHelper,
+      new Camera2Session(callback, events, applicationContext, cameraManager, surfaceTextureHelper,
         cameraId, width, height, framerate);
   }
 

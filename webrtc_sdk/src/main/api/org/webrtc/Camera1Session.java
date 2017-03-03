@@ -59,6 +59,7 @@ public class Camera1Session implements CameraSession {
     events.onCameraOpening();
 
     final android.hardware.Camera camera;
+    // open Camera
     try {
       camera = android.hardware.Camera.open(cameraId);
     } catch (RuntimeException e) {
@@ -66,6 +67,7 @@ public class Camera1Session implements CameraSession {
       return;
     }
 
+    // set preview texture
     try {
       camera.setPreviewTexture(surfaceTextureHelper.getSurfaceTexture());
     } catch (IOException e) {
@@ -74,10 +76,14 @@ public class Camera1Session implements CameraSession {
       return;
     }
 
+    // get camera info
     final android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
     android.hardware.Camera.getCameraInfo(cameraId, info);
 
+    // get camera parameters
     final android.hardware.Camera.Parameters parameters = camera.getParameters();
+
+
     final CaptureFormat captureFormat =
         findClosestCaptureFormat(parameters, width, height, framerate);
     final Size pictureSize = findClosestPictureSize(parameters, width, height);

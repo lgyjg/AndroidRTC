@@ -10,11 +10,7 @@
 
 package org.webrtc;
 
-import org.webrtc.CameraEnumerationAndroid.CaptureFormat;
-
 import android.content.Context;
-
-import java.util.List;
 
 public class Camera1Capturer extends CameraCapturer {
   private final boolean captureToTexture;

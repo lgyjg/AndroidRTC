@@ -33,10 +33,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Handles the initial setup where the user selects which room to join.
@@ -317,6 +319,14 @@ public class ConnectActivity extends Activity {
     }
   }
 
+  /**
+   * connect to chat room
+   * @param roomId the room id as "1234567"
+   * @param commandLineRun whether is run in commandline
+   * @param loopback whether in look back call
+   * @param useValuesFromIntent whether use values From Intent
+   * @param runTimeMs
+   */
   private void connectToRoom(String roomId, boolean commandLineRun, boolean loopback,
       boolean useValuesFromIntent, int runTimeMs) {
     this.commandLineRun = commandLineRun;
