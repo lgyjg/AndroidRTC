@@ -27,10 +27,10 @@ How to clone/download the code of webRTC see : https://webrtc.org/native-code/de
 
   To build:
 
-  $ git clone git@github.com:lgyjg/AndroidRTC.git
-  $ cd AndroidRTC/
-  $ git checkout -b master
-  $ ./gradlew build
+  $ git clone git@github.com:lgyjg/AndroidRTC.git 
+  $ cd AndroidRTC/ 
+  $ git checkout -b master 
+  $ ./gradlew build 
 
 # Bugs and Feedback
 
