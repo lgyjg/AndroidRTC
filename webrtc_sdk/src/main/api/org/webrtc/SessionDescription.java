@@ -40,4 +40,9 @@ public class SessionDescription {
     this.type = type;
     this.description = description;
   }
+
+  @Override
+  public String toString() {
+    return "SessionDescription:[" + "Type: " + type + ";description: " + description + "]";
+  }
 }

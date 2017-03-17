@@ -413,7 +413,6 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
     final String[] deviceNames = enumerator.getDeviceNames();
 
-    Logging.e(TAG, "Camera access exception:");
     // First, try to find front facing camera
     Logging.d(TAG, "Looking for front facing cameras.");
     for (String deviceName : deviceNames) {
