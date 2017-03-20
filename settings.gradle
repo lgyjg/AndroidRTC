@@ -1,2 +1,2 @@
-include ':androidapp', ':webrtc_sdk'
-//,':androidtests'
+include ':webrtc_sdk', ':apprtc'
+

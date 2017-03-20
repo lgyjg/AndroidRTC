@@ -1,15 +1,18 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 25
     buildToolsVersion "25.0.2"
+
     defaultConfig {
-        applicationId "site.aman.demo.androidrtc"
+        applicationId "site.aman.demo.apprtc"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
     buildTypes {
         release {
@@ -17,21 +20,21 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    sourceSets {
-        main {
-            manifest.srcFile file('AndroidManifest.xml')
-            def src = ['src']
-            java.srcDirs = src
-        }
-    }
 }
 
-
 dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
     testCompile 'junit:junit:4.12'
+    compile project(':webrtc_sdk')
+    compile files('libs/mockito_java.jar')
+    compile files('libs/third_party/autobanh/lib/autobanh.jar')
+    compile files('libs/shadows-core-3.0-21.jar')
+    compile files('libs/robolectric_annotations_java.jar')
+    compile files('libs/junit_test_support.jar')
+    compile files('libs/robolectric_java.jar')
 }
