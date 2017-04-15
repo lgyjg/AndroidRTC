@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc.util;
+package org.appspot.apprtc.RTCClient;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,20 +30,18 @@ public class AsyncHttpURLConnection {
   private final AsyncHttpEvents events;
   private String contentType;
 
-  /**
-   * Http requests callbacks.
-   */
-  public interface AsyncHttpEvents {
-    void onHttpError(String errorMessage);
-    void onHttpComplete(String response);
-  }
-
   public AsyncHttpURLConnection(String method, String url, String message, AsyncHttpEvents events) {
     this.method = method;
     this.url = url;
     this.message = message;
     this.events = events;
   }
+
+    // Return the contents of an InputStream as a String.
+    private static String drainStream(InputStream in) {
+        Scanner s = new Scanner(in).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
+    }
 
   public void setContentType(String contentType) {
     this.contentType = contentType;
@@ -111,9 +109,12 @@ public class AsyncHttpURLConnection {
     }
   }
 
-  // Return the contents of an InputStream as a String.
-  private static String drainStream(InputStream in) {
-    Scanner s = new Scanner(in).useDelimiter("\\A");
-    return s.hasNext() ? s.next() : "";
+    /**
+     * Http requests callbacks.
+     */
+    public interface AsyncHttpEvents {
+        void onHttpError(String errorMessage);
+
+        void onHttpComplete(String response);
   }
 }

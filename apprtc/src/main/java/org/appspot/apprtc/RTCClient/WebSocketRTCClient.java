@@ -8,18 +8,14 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
-
-import org.appspot.apprtc.RoomParametersFetcher.RoomParametersFetcherEvents;
-import org.appspot.apprtc.WebSocketChannelClient.WebSocketChannelEvents;
-import org.appspot.apprtc.WebSocketChannelClient.WebSocketConnectionState;
-import org.appspot.apprtc.util.AsyncHttpURLConnection;
-import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
+package org.appspot.apprtc.RTCClient;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import org.appspot.apprtc.RTCClient.AsyncHttpURLConnection.AsyncHttpEvents;
+import org.appspot.apprtc.RTCClient.RoomParametersFetcher.RoomParametersFetcherEvents;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,16 +32,11 @@ import org.webrtc.SessionDescription;
  * Messages to other party (with local Ice candidates and answer SDP) can
  * be sent after WebSocket connection is established.
  */
-public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents {
+public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelClient.WebSocketChannelEvents {
   private static final String TAG = "WSRTCClient";
   private static final String ROOM_JOIN = "join";
   private static final String ROOM_MESSAGE = "message";
   private static final String ROOM_LEAVE = "leave";
-
-  private enum ConnectionState { NEW, CONNECTED, CLOSED, ERROR }
-
-  private enum MessageType { MESSAGE, LEAVE }
-
   private final Handler handler;
   private boolean initiator;
   private SignalingEvents events;
@@ -54,13 +45,21 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
   private RoomConnectionParameters connectionParameters;
   private String messageUrl;
   private String leaveUrl;
-
   public WebSocketRTCClient(SignalingEvents events) {
     this.events = events;
     roomState = ConnectionState.NEW;
     final HandlerThread handlerThread = new HandlerThread(TAG);
     handlerThread.start();
     handler = new Handler(handlerThread.getLooper());
+  }
+
+  // Put a |key|->|value| mapping in |json|.
+  private static void jsonPut(JSONObject json, String key, Object value) {
+    try {
+      json.put(key, value);
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   // --------------------------------------------------------------------
@@ -282,7 +281,7 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
   // (passed to WebSocket client constructor).
   @Override
   public void onWebSocketMessage(final String msg) {
-    if (wsClient.getState() != WebSocketConnectionState.REGISTERED) {
+    if (wsClient.getState() != WebSocketChannelClient.WebSocketConnectionState.REGISTERED) {
       Log.e(TAG, "Got WebSocket message in non registered state.");
       return;
     }
@@ -360,15 +359,6 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
     });
   }
 
-  // Put a |key|->|value| mapping in |json|.
-  private static void jsonPut(JSONObject json, String key, Object value) {
-    try {
-      json.put(key, value);
-    } catch (JSONException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   // Send SDP or ICE candidate to a room server.
   private void sendPostMessage(
       final MessageType messageType, final String url, final String message) {
@@ -416,4 +406,8 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
     return new IceCandidate(
         json.getString("id"), json.getInt("label"), json.getString("candidate"));
   }
+
+  private enum ConnectionState {NEW, CONNECTED, CLOSED, ERROR}
+
+  private enum MessageType {MESSAGE, LEAVE}
 }

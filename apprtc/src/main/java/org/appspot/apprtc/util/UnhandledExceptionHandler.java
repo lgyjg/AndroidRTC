@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -37,6 +37,23 @@ public class UnhandledExceptionHandler implements Thread.UncaughtExceptionHandle
     this.activity = activity;
   }
 
+    // Returns the Message attached to the original Cause of |t|.
+    private static String getTopLevelCauseMessage(Throwable t) {
+        Throwable topLevelCause = t;
+        while (topLevelCause.getCause() != null) {
+            topLevelCause = topLevelCause.getCause();
+        }
+        return topLevelCause.getMessage();
+    }
+
+    // Returns a human-readable String of the stacktrace in |t|, recursively
+    // through all Causes that led to |t|.
+    private static String getRecursiveStackTrace(Throwable t) {
+        StringWriter writer = new StringWriter();
+        t.printStackTrace(new PrintWriter(writer));
+        return writer.toString();
+    }
+
   public void uncaughtException(Thread unusedThread, final Throwable e) {
     activity.runOnUiThread(new Runnable() {
       @Override
@@ -63,22 +80,5 @@ public class UnhandledExceptionHandler implements Thread.UncaughtExceptionHandle
             .show();
       }
     });
-  }
-
-  // Returns the Message attached to the original Cause of |t|.
-  private static String getTopLevelCauseMessage(Throwable t) {
-    Throwable topLevelCause = t;
-    while (topLevelCause.getCause() != null) {
-      topLevelCause = topLevelCause.getCause();
-    }
-    return topLevelCause.getMessage();
-  }
-
-  // Returns a human-readable String of the stacktrace in |t|, recursively
-  // through all Causes that led to |t|.
-  private static String getRecursiveStackTrace(Throwable t) {
-    StringWriter writer = new StringWriter();
-    t.printStackTrace(new PrintWriter(writer));
-    return writer.toString();
   }
 }

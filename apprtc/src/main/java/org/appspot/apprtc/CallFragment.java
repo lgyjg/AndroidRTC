@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import org.appspot.apprtc.controller.CaptureQualityController;
 import org.webrtc.RendererCommon.ScalingType;
 
 /**
@@ -37,17 +38,6 @@ public class CallFragment extends Fragment {
   private OnCallEvents callEvents;
   private ScalingType scalingType;
   private boolean videoCallEnabled = true;
-
-  /**
-   * Call control interface for container activity.
-   */
-  public interface OnCallEvents {
-    void onCallHangUp();
-    void onCameraSwitch();
-    void onVideoScalingSwitch(ScalingType scalingType);
-    void onCaptureFormatChange(int width, int height, int framerate);
-    boolean onToggleMic();
-  }
 
   @Override
   public View onCreateView(
@@ -135,5 +125,20 @@ public class CallFragment extends Fragment {
   public void onAttach(Activity activity) {
     super.onAttach(activity);
     callEvents = (OnCallEvents) activity;
+  }
+
+  /**
+   * Call control interface for container activity.
+   */
+  public interface OnCallEvents {
+    void onCallHangUp();
+
+    void onCameraSwitch();
+
+    void onVideoScalingSwitch(ScalingType scalingType);
+
+    void onCaptureFormatChange(int width, int height, int framerate);
+
+    boolean onToggleMic();
   }
 }

@@ -16,10 +16,10 @@ import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.util.Log;
 
-import org.appspot.apprtc.AppRTCClient.SignalingParameters;
-import org.appspot.apprtc.PeerConnectionClient;
-import org.appspot.apprtc.PeerConnectionClient.PeerConnectionEvents;
-import org.appspot.apprtc.PeerConnectionClient.PeerConnectionParameters;
+import org.appspot.apprtc.RTCClient.AppRTCClient.SignalingParameters;
+import org.appspot.apprtc.p2p.PeerConnectionClient;
+import org.appspot.apprtc.p2p.PeerConnectionClient.PeerConnectionParameters;
+import org.appspot.apprtc.p2p.PeerConnectionEvents;
 import org.chromium.base.test.BaseJUnit4ClassRunner;
 import org.junit.After;
 import org.junit.Before;
@@ -70,68 +70,22 @@ public class PeerConnectionClientTest implements PeerConnectionEvents {
   private static final int HEIGHT_VGA = 480;
   private static final int WIDTH_QVGA = 320;
   private static final int HEIGHT_QVGA = 240;
-
+  private final Object localSdpEvent = new Object();
+  private final Object iceCandidateEvent = new Object();
+  private final Object iceConnectedEvent = new Object();
+  private final Object closeEvent = new Object();
   // The peer connection client is assumed to be thread safe in itself; the
   // reference is written by the test thread and read by worker threads.
   private volatile PeerConnectionClient pcClient;
   private volatile boolean loopback;
-
   // EGL context that can be used by hardware video decoders to decode to a texture.
   private EglBase eglBase;
-
   // These are protected by their respective event objects.
   private ExecutorService signalingExecutor;
   private boolean isClosed;
   private boolean isIceConnected;
   private SessionDescription localSdp;
-  private List<IceCandidate> iceCandidates = new LinkedList<IceCandidate>();
-  private final Object localSdpEvent = new Object();
-  private final Object iceCandidateEvent = new Object();
-  private final Object iceConnectedEvent = new Object();
-  private final Object closeEvent = new Object();
-
-  // Mock renderer implementation.
-  private static class MockRenderer implements VideoRenderer.Callbacks {
-    // These are protected by 'this' since we gets called from worker threads.
-    private String rendererName;
-    private boolean renderFrameCalled = false;
-
-    // Thread-safe in itself.
-    private CountDownLatch doneRendering;
-
-    public MockRenderer(int expectedFrames, String rendererName) {
-      this.rendererName = rendererName;
-      reset(expectedFrames);
-    }
-
-    // Resets render to wait for new amount of video frames.
-    public synchronized void reset(int expectedFrames) {
-      renderFrameCalled = false;
-      doneRendering = new CountDownLatch(expectedFrames);
-    }
-
-    @Override
-    public synchronized void renderFrame(VideoRenderer.I420Frame frame) {
-      if (!renderFrameCalled) {
-        if (rendererName != null) {
-          Log.d(TAG, rendererName + " render frame: " + frame.rotatedWidth() + " x "
-                  + frame.rotatedHeight());
-        } else {
-          Log.d(TAG, "Render frame: " + frame.rotatedWidth() + " x " + frame.rotatedHeight());
-        }
-      }
-      renderFrameCalled = true;
-      VideoRenderer.renderFrameDone(frame);
-      doneRendering.countDown();
-    }
-
-    // This method shouldn't hold any locks or touch member variables since it
-    // blocks.
-    public boolean waitForFramesRendered(int timeoutMs) throws InterruptedException {
-      doneRendering.await(timeoutMs, TimeUnit.MILLISECONDS);
-      return (doneRendering.getCount() <= 0);
-    }
-  }
+  private List<IceCandidate> iceCandidates = new LinkedList<>();
 
   // Peer connection events implementation.
   @Override
@@ -697,5 +651,48 @@ public class PeerConnectionClientTest implements PeerConnectionEvents {
     pcClient.close();
     assertTrue(waitForPeerConnectionClosed(WAIT_TIMEOUT));
     Log.d(TAG, "testCaptureFormatChange done.");
+  }
+
+  // Mock renderer implementation.
+  private static class MockRenderer implements VideoRenderer.Callbacks {
+    // These are protected by 'this' since we gets called from worker threads.
+    private String rendererName;
+    private boolean renderFrameCalled = false;
+
+    // Thread-safe in itself.
+    private CountDownLatch doneRendering;
+
+    public MockRenderer(int expectedFrames, String rendererName) {
+      this.rendererName = rendererName;
+      reset(expectedFrames);
+    }
+
+    // Resets render to wait for new amount of video frames.
+    public synchronized void reset(int expectedFrames) {
+      renderFrameCalled = false;
+      doneRendering = new CountDownLatch(expectedFrames);
+    }
+
+    @Override
+    public synchronized void renderFrame(VideoRenderer.I420Frame frame) {
+      if (!renderFrameCalled) {
+        if (rendererName != null) {
+          Log.d(TAG, rendererName + " render frame: " + frame.rotatedWidth() + " x "
+                  + frame.rotatedHeight());
+        } else {
+          Log.d(TAG, "Render frame: " + frame.rotatedWidth() + " x " + frame.rotatedHeight());
+        }
+      }
+      renderFrameCalled = true;
+      VideoRenderer.renderFrameDone(frame);
+      doneRendering.countDown();
+    }
+
+    // This method shouldn't hold any locks or touch member variables since it
+    // blocks.
+    public boolean waitForFramesRendered(int timeoutMs) throws InterruptedException {
+      doneRendering.await(timeoutMs, TimeUnit.MILLISECONDS);
+      return (doneRendering.getCount() <= 0);
+    }
   }
 }

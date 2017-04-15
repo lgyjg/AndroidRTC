@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.util;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.SystemClock;
 import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -69,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  *      jumping up and back down we might create faulty CPU load readings.
  */
 
-class CpuMonitor {
+public class CpuMonitor {
   private static final String TAG = "CpuMonitor";
   private static final int MOVING_AVERAGE_SAMPLES = 5;
 
@@ -98,59 +99,6 @@ class CpuMonitor {
   private double[] curFreqScales;
   private ProcStat lastProcStat;
 
-  private static class ProcStat {
-    final long userTime;
-    final long systemTime;
-    final long idleTime;
-
-    ProcStat(long userTime, long systemTime, long idleTime) {
-      this.userTime = userTime;
-      this.systemTime = systemTime;
-      this.idleTime = idleTime;
-    }
-  }
-
-  private static class MovingAverage {
-    private final int size;
-    private double sum;
-    private double currentValue;
-    private double[] circBuffer;
-    private int circBufferIndex;
-
-    public MovingAverage(int size) {
-      if (size <= 0) {
-        throw new AssertionError("Size value in MovingAverage ctor should be positive.");
-      }
-      this.size = size;
-      circBuffer = new double[size];
-    }
-
-    public void reset() {
-      Arrays.fill(circBuffer, 0);
-      circBufferIndex = 0;
-      sum = 0;
-      currentValue = 0;
-    }
-
-    public void addValue(double value) {
-      sum -= circBuffer[circBufferIndex];
-      circBuffer[circBufferIndex++] = value;
-      currentValue = value;
-      sum += value;
-      if (circBufferIndex >= size) {
-        circBufferIndex = 0;
-      }
-    }
-
-    public double getCurrent() {
-      return currentValue;
-    }
-
-    public double getAverage() {
-      return sum / (double) size;
-    }
-  }
-
   public CpuMonitor(Context context) {
     Log.d(TAG, "CpuMonitor ctor.");
     appContext = context.getApplicationContext();
@@ -161,6 +109,16 @@ class CpuMonitor {
     lastStatLogTimeMs = SystemClock.elapsedRealtime();
 
     scheduleCpuUtilizationTask();
+  }
+
+  private static long parseLong(String value) {
+    long number = 0;
+    try {
+      number = Long.parseLong(value);
+    } catch (NumberFormatException e) {
+      Log.e(TAG, "parseLong error.", e);
+    }
+    return number;
   }
 
   public void pause() {
@@ -455,16 +413,6 @@ class CpuMonitor {
     return number;
   }
 
-  private static long parseLong(String value) {
-    long number = 0;
-    try {
-      number = Long.parseLong(value);
-    } catch (NumberFormatException e) {
-      Log.e(TAG, "parseLong error.", e);
-    }
-    return number;
-  }
-
   /*
    * Read the current utilization of all CPUs using the cumulative first line
    * of /proc/stat.
@@ -507,5 +455,58 @@ class CpuMonitor {
       return null;
     }
     return new ProcStat(userTime, systemTime, idleTime);
+  }
+
+  private static class ProcStat {
+    final long userTime;
+    final long systemTime;
+    final long idleTime;
+
+    ProcStat(long userTime, long systemTime, long idleTime) {
+      this.userTime = userTime;
+      this.systemTime = systemTime;
+      this.idleTime = idleTime;
+    }
+  }
+
+  private static class MovingAverage {
+    private final int size;
+    private double sum;
+    private double currentValue;
+    private double[] circBuffer;
+    private int circBufferIndex;
+
+    public MovingAverage(int size) {
+      if (size <= 0) {
+        throw new AssertionError("Size value in MovingAverage ctor should be positive.");
+      }
+      this.size = size;
+      circBuffer = new double[size];
+    }
+
+    public void reset() {
+      Arrays.fill(circBuffer, 0);
+      circBufferIndex = 0;
+      sum = 0;
+      currentValue = 0;
+    }
+
+    public void addValue(double value) {
+      sum -= circBuffer[circBufferIndex];
+      circBuffer[circBufferIndex++] = value;
+      currentValue = value;
+      sum += value;
+      if (circBufferIndex >= size) {
+        circBufferIndex = 0;
+      }
+    }
+
+    public double getCurrent() {
+      return currentValue;
+    }
+
+    public double getAverage() {
+      return sum / (double) size;
+    }
   }
 }

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.RTCClient;
 
 import android.util.Log;
 
@@ -31,11 +31,8 @@ import java.util.regex.Pattern;
  * connections.
  */
 public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChannelEvents {
-  private static final String TAG = "DirectRTCClient";
-  private static final int DEFAULT_PORT = 8888;
-
   // Regex pattern used for checking if room id looks like an IP.
-  static final Pattern IP_PATTERN = Pattern.compile("("
+  public static final Pattern IP_PATTERN = Pattern.compile("("
       // IPv4
       + "((\\d+\\.){3}\\d+)|"
       // IPv6
@@ -50,14 +47,12 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
       + ")"
       // Optional port number
       + "(:(\\d+))?");
-
+  private static final String TAG = "DirectRTCClient";
+  private static final int DEFAULT_PORT = 8888;
   private final ExecutorService executor;
   private final SignalingEvents events;
   private TCPChannelClient tcpClient;
   private RoomConnectionParameters connectionParameters;
-
-  private enum ConnectionState { NEW, CONNECTED, CLOSED, ERROR }
-
   // All alterations of the room state should be done from inside the looper thread.
   private ConnectionState roomState;
 
@@ -66,6 +61,30 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
 
     executor = Executors.newSingleThreadExecutor();
     roomState = ConnectionState.NEW;
+  }
+
+  // Put a |key|->|value| mapping in |json|.
+  private static void jsonPut(JSONObject json, String key, Object value) {
+    try {
+      json.put(key, value);
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // Converts a Java candidate to a JSONObject.
+  private static JSONObject toJsonCandidate(final IceCandidate candidate) {
+    JSONObject json = new JSONObject();
+    jsonPut(json, "label", candidate.sdpMLineIndex);
+    jsonPut(json, "id", candidate.sdpMid);
+    jsonPut(json, "candidate", candidate.sdp);
+    return json;
+  }
+
+  // Converts a JSON candidate to a Java object.
+  private static IceCandidate toJavaCandidate(JSONObject json) throws JSONException {
+    return new IceCandidate(
+            json.getString("id"), json.getInt("label"), json.getString("candidate"));
   }
 
   /**
@@ -177,6 +196,9 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
     });
   }
 
+  // -------------------------------------------------------------------
+  // TCPChannelClient event handlers
+
   @Override
   public void sendLocalIceCandidate(final IceCandidate candidate) {
     executor.execute(new Runnable() {
@@ -219,9 +241,6 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
       }
     });
   }
-
-  // -------------------------------------------------------------------
-  // TCPChannelClient event handlers
 
   /**
    * If the client is the server side, this will trigger onConnectedToRoom.
@@ -321,27 +340,5 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
     });
   }
 
-  // Put a |key|->|value| mapping in |json|.
-  private static void jsonPut(JSONObject json, String key, Object value) {
-    try {
-      json.put(key, value);
-    } catch (JSONException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  // Converts a Java candidate to a JSONObject.
-  private static JSONObject toJsonCandidate(final IceCandidate candidate) {
-    JSONObject json = new JSONObject();
-    jsonPut(json, "label", candidate.sdpMLineIndex);
-    jsonPut(json, "id", candidate.sdpMid);
-    jsonPut(json, "candidate", candidate.sdp);
-    return json;
-  }
-
-  // Converts a JSON candidate to a Java object.
-  private static IceCandidate toJavaCandidate(JSONObject json) throws JSONException {
-    return new IceCandidate(
-        json.getString("id"), json.getInt("label"), json.getString("candidate"));
-  }
+  private enum ConnectionState {NEW, CONNECTED, CLOSED, ERROR}
 }

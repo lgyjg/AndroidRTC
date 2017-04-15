@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.appspot.apprtc.p2p.PeerConnectionClient;
+import org.appspot.apprtc.util.CpuMonitor;
 import org.webrtc.StatsReport;
 
 import java.util.HashMap;

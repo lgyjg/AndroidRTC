@@ -10,6 +10,7 @@
 
 package org.appspot.apprtc;
 
+import org.appspot.apprtc.RTCClient.TCPChannelClient;
 import org.chromium.base.test.util.DisabledTest;
 import org.chromium.testing.local.LocalRobolectricTestRunner;
 import org.junit.After;

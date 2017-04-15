@@ -10,6 +10,17 @@
 
 package org.appspot.apprtc;
 
+import org.appspot.apprtc.RTCClient.AppRTCClient;
+import org.appspot.apprtc.RTCClient.DirectRTCClient;
+import org.chromium.testing.local.LocalRobolectricTestRunner;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
+import org.webrtc.IceCandidate;
+import org.webrtc.SessionDescription;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -20,15 +31,6 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import org.chromium.testing.local.LocalRobolectricTestRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowLog;
-import org.webrtc.IceCandidate;
-import org.webrtc.SessionDescription;
-
 /**
  * Test for DirectRTCClient. Test is very simple and only tests the overall sanity of the class
  * behaviour.
@@ -36,20 +38,16 @@ import org.webrtc.SessionDescription;
 @RunWith(LocalRobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class DirectRTCClientTest {
-  private static final String ROOM_URL = "";
-  private static final boolean LOOPBACK = false;
-
-  private static final String DUMMY_SDP_MID = "sdpMid";
-  private static final String DUMMY_SDP = "sdp";
-
   public static final int SERVER_WAIT = 100;
   public static final int NETWORK_TIMEOUT = 1000;
-
-  private DirectRTCClient client;
-  private DirectRTCClient server;
-
+  private static final String ROOM_URL = "";
+  private static final boolean LOOPBACK = false;
+  private static final String DUMMY_SDP_MID = "sdpMid";
+  private static final String DUMMY_SDP = "sdp";
   AppRTCClient.SignalingEvents clientEvents;
   AppRTCClient.SignalingEvents serverEvents;
+  private DirectRTCClient client;
+  private DirectRTCClient server;
 
   @Before
   public void setUp() {

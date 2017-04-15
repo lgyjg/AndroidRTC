@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
+package org.appspot.apprtc.RTCClient;
 
 import android.util.Log;
 
@@ -39,17 +39,6 @@ public class TCPChannelClient {
   private final ThreadUtils.ThreadChecker executorThreadCheck;
   private final TCPChannelEvents eventListener;
   private TCPSocket socket;
-
-  /**
-   * Callback interface for messages delivered on TCP Connection. All callbacks are invoked from the
-   * looper executor thread.
-   */
-  public interface TCPChannelEvents {
-    void onTCPConnected(boolean server);
-    void onTCPMessage(String message);
-    void onTCPError(String description);
-    void onTCPClose();
-  }
 
   /**
    * Initializes the TCPChannelClient. If IP is a local IP address, starts a listening server on
@@ -117,6 +106,20 @@ public class TCPChannelClient {
   }
 
   /**
+   * Callback interface for messages delivered on TCP Connection. All callbacks are invoked from the
+   * looper executor thread.
+   */
+  public interface TCPChannelEvents {
+    void onTCPConnected(boolean server);
+
+    void onTCPMessage(String message);
+
+    void onTCPError(String description);
+
+    void onTCPClose();
+  }
+
+  /**
    * Base class for server and client sockets. Contains a listening thread that will call
    * eventListener.onTCPMessage on new messages.
    */
@@ -126,18 +129,19 @@ public class TCPChannelClient {
     private PrintWriter out;
     private Socket rawSocket;
 
+    TCPSocket() {
+      rawSocketLock = new Object();
+    }
+
     /**
      * Connect to the peer, potentially a slow operation.
      *
      * @return Socket connection, null if connection failed.
      */
     public abstract Socket connect();
+
     /** Returns true if sockets is a server rawSocket. */
     public abstract boolean isServer();
-
-    TCPSocket() {
-      rawSocketLock = new Object();
-    }
 
     /**
      * The listening thread.
@@ -261,11 +265,10 @@ public class TCPChannelClient {
   }
 
   private class TCPSocketServer extends TCPSocket {
-    // Server socket is also guarded by rawSocketLock.
-    private ServerSocket serverSocket;
-
     final private InetAddress address;
     final private int port;
+    // Server socket is also guarded by rawSocketLock.
+    private ServerSocket serverSocket;
 
     public TCPSocketServer(InetAddress address, int port) {
       this.address = address;

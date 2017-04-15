@@ -8,14 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-package org.appspot.apprtc;
-
-import org.appspot.apprtc.AppRTCClient.SignalingParameters;
-import org.appspot.apprtc.util.AsyncHttpURLConnection;
-import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
+package org.appspot.apprtc.RTCClient;
 
 import android.util.Log;
 
+import org.appspot.apprtc.RTCClient.AppRTCClient.SignalingParameters;
+import org.appspot.apprtc.RTCClient.AsyncHttpURLConnection.AsyncHttpEvents;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,27 +40,17 @@ public class RoomParametersFetcher {
   private final String roomMessage;
   private AsyncHttpURLConnection httpConnection;
 
-  /**
-   * Room parameters fetcher callbacks.
-   */
-  public interface RoomParametersFetcherEvents {
-    /**
-     * Callback fired once the room's signaling parameters
-     * SignalingParameters are extracted.
-     */
-    void onSignalingParametersReady(final SignalingParameters params);
-
-    /**
-     * Callback for room parameters extraction error.
-     */
-    void onSignalingParametersError(final String description);
-  }
-
   public RoomParametersFetcher(
       String roomUrl, String roomMessage, final RoomParametersFetcherEvents events) {
     this.roomUrl = roomUrl;
     this.roomMessage = roomMessage;
     this.events = events;
+  }
+
+  // Return the contents of an InputStream as a String.
+  private static String drainStream(InputStream in) {
+    Scanner s = new Scanner(in).useDelimiter("\\A");
+    return s.hasNext() ? s.next() : "";
   }
 
   public void makeRequest() {
@@ -209,9 +197,19 @@ public class RoomParametersFetcher {
     return ret;
   }
 
-  // Return the contents of an InputStream as a String.
-  private static String drainStream(InputStream in) {
-    Scanner s = new Scanner(in).useDelimiter("\\A");
-    return s.hasNext() ? s.next() : "";
+  /**
+   * Room parameters fetcher callbacks.
+   */
+  public interface RoomParametersFetcherEvents {
+    /**
+     * Callback fired once the room's signaling parameters
+     * SignalingParameters are extracted.
+     */
+    void onSignalingParametersReady(final SignalingParameters params);
+
+    /**
+     * Callback for room parameters extraction error.
+     */
+    void onSignalingParametersError(final String description);
   }
 }
