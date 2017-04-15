@@ -32,13 +32,14 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Toast;
 
-import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
-import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
 import org.appspot.apprtc.RTCClient.AppRTCClient;
 import org.appspot.apprtc.RTCClient.AppRTCClient.RoomConnectionParameters;
 import org.appspot.apprtc.RTCClient.AppRTCClient.SignalingParameters;
 import org.appspot.apprtc.RTCClient.DirectRTCClient;
 import org.appspot.apprtc.RTCClient.WebSocketRTCClient;
+import org.appspot.apprtc.manager.AppRTCAudioManager;
+import org.appspot.apprtc.manager.AppRTCAudioManager.AudioDevice;
+import org.appspot.apprtc.manager.AppRTCAudioManager.AudioManagerEvents;
 import org.appspot.apprtc.p2p.PeerConnectionClient;
 import org.appspot.apprtc.p2p.PeerConnectionClient.DataChannelParameters;
 import org.appspot.apprtc.p2p.PeerConnectionClient.PeerConnectionParameters;
